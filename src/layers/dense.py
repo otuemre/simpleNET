@@ -24,7 +24,7 @@ class Dense(Layer):
         super().__init__()
 
         # Initializing Weights and Biases
-        self.weights = np.random.rand(input_size, output_size) * 0.01
+        self.weights = np.random.rand(input_size, output_size) * np.sqrt(2 / input_size)
         self.biases = np.zeros((1, output_size))
 
     def forward(self, input_data):
