@@ -1,4 +1,4 @@
-from layer import Layer
+from .layer import Layer
 import numpy as np
 
 class Dense(Layer):
@@ -46,7 +46,7 @@ class Dense(Layer):
         self.input = input_data
 
         # Calculating output
-        self.output = np.dot(input_data, self.weights) + self.biases
+        self.output = np.dot(self.input, self.weights) + self.biases
 
         return self.output
 
