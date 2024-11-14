@@ -1,3 +1,5 @@
+from .util.accuracy import calculate_accuracy
+
 class Model:
 
     def __init__(self):
@@ -31,14 +33,14 @@ class Model:
         for layer in reversed(self.layers):
             loss_gradient = layer.backward(loss_gradient, learning_rate)
 
-    def train(self, X, y, epochs, learning_rate, patience=5):
+    def train(self, X, y, epochs, learning_rate, patience=5, min_delta=1e-4):
         """Train the model"""
-
-        min_delta = 1e-4
 
         for epoch in range(epochs):
             # Forward pass
             y_pred = self.forward(X)
+            # Calculate Accuracy
+            accuracy = calculate_accuracy(y, y_pred)
             # Calculate loss
             loss = self.loss.calculate(y, y_pred)
             # Backward pass
@@ -54,7 +56,7 @@ class Model:
                 print(f"Early stopping at epoch {epoch + 1}")
                 break
 
-            print(f"Epoch {epoch + 1}/{epochs}, Loss: {loss}")
+            print(f"Epoch {epoch + 1}/{epochs}, Loss: {loss}, Accuracy: {accuracy}%")
 
     def predict(self, X):
         """Make prediction with the trained model"""
