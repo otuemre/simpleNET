@@ -33,30 +33,41 @@ class Model:
         for layer in reversed(self.layers):
             loss_gradient = layer.backward(loss_gradient, learning_rate)
 
-    def train(self, X, y, epochs, learning_rate, patience=5, min_delta=1e-4):
-        """Train the model"""
+    def train(self, X_train, y_train, X_val, y_val, epochs, learning_rate, patience=5, min_delta=1e-4, early_stopping=False):
+        """Train the model with optional early stopping"""
 
         for epoch in range(epochs):
-            # Forward pass
-            y_pred = self.forward(X)
-            # Calculate Accuracy
-            accuracy = calculate_accuracy(y, y_pred)
-            # Calculate loss
-            loss = self.loss.calculate(y, y_pred)
-            # Backward pass
-            self.backward(y, y_pred, learning_rate)
+            # Forward pass on training data
+            y_pred_train = self.forward(X_train)
+            train_accuracy = calculate_accuracy(y_train, y_pred_train)
+            train_loss = self.loss.calculate(y_train, y_pred_train)
+            self.backward(y_train, y_pred_train, learning_rate)
 
-            if loss < self.best_val_loss - min_delta:
-                self.best_val_loss = loss
-                self.early_stopping_counter = 0
+            # Validation loss and early stopping check if enabled
+            if early_stopping:
+                y_pred_val = self.forward(X_val)
+                val_loss = self.loss.calculate(y_val, y_pred_val)
+
+                # Use the helper function for early stopping logic
+                if self._check_early_stopping(val_loss, min_delta, patience):
+                    print(f"Early stopping at epoch {epoch + 1}")
+                    break
+
+                print(f"Epoch {epoch + 1}/{epochs}, Train Loss: {train_loss}, Train Accuracy: {train_accuracy}%, Val Loss: {val_loss}")
             else:
-                self.early_stopping_counter += 1
+                print(f"Epoch {epoch + 1}/{epochs}, Train Loss: {train_loss}, Train Accuracy: {train_accuracy}%")
 
-            if self.early_stopping_counter >= patience:
-                print(f"Early stopping at epoch {epoch + 1}")
-                break
+    def _check_early_stopping(self, val_loss, min_delta, patience):
+        """Check and update early stopping condition"""
 
-            print(f"Epoch {epoch + 1}/{epochs}, Loss: {loss}, Accuracy: {accuracy}%")
+        if val_loss < self.best_val_loss - min_delta:
+            self.best_val_loss = val_loss
+            self.early_stopping_counter = 0
+        else:
+            self.early_stopping_counter += 1
+
+        # Return True if early stopping should trigger
+        return self.early_stopping_counter >= patience
 
     def predict(self, X):
         """Make prediction with the trained model"""
