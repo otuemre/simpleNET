@@ -15,16 +15,16 @@ LEARNING_RATE = 0.1
 
 # Building the model
 model = Model()
-model.add(Dense(input_size=2, output_size=4))  # Hidden layer with 4 neurons
+model.add(Dense(input_size=2, output_size=8))  # Hidden layer with 4 neurons
 model.add(ReLU())
-model.add(Dense(input_size=4, output_size=1))  # Output layer with 1 neuron
+model.add(Dense(input_size=8, output_size=1))  # Output layer with 1 neuron
 model.add(Sigmoid())
 
 # Setting loss function
 model.set_loss(BinaryCrossEntropy())
 
 # Training the model
-model.train(X, y, epochs=EPOCHS, learning_rate=LEARNING_RATE)
+model.train(X, y, epochs=EPOCHS, learning_rate=LEARNING_RATE, patience=5, min_delta=1e-4)
 
 # Evaluating the model
 predictions = model.predict(X)
