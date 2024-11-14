@@ -4,6 +4,10 @@ class Model:
         self.layers = []
         self.loss = None
 
+        # Early Stopping
+        self.best_val_loss = float("inf")
+        self.early_stopping_counter = 0
+
     def add(self, layer):
         """Add a layer to the model"""
         self.layers.append(layer)
@@ -27,8 +31,11 @@ class Model:
         for layer in reversed(self.layers):
             loss_gradient = layer.backward(loss_gradient, learning_rate)
 
-    def train(self, X, y, epochs, learning_rate):
+    def train(self, X, y, epochs, learning_rate, patience=5):
         """Train the model"""
+
+        min_delta = 1e-4
+
         for epoch in range(epochs):
             # Forward pass
             y_pred = self.forward(X)
@@ -36,6 +43,16 @@ class Model:
             loss = self.loss.calculate(y, y_pred)
             # Backward pass
             self.backward(y, y_pred, learning_rate)
+
+            if loss < self.best_val_loss - min_delta:
+                self.best_val_loss = loss
+                self.early_stopping_counter = 0
+            else:
+                self.early_stopping_counter += 1
+
+            if self.early_stopping_counter >= patience:
+                print(f"Early stopping at epoch {epoch + 1}")
+                break
 
             print(f"Epoch {epoch + 1}/{epochs}, Loss: {loss}")
 
